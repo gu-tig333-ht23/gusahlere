@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:template/add_task.dart';
-import 'package:template/todo.dart';
+import 'add_task.dart';
+import 'filter.dart';
+import 'todo.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,17 +11,43 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  TaskFilter currentFilter = TaskFilter.All;
+
   //lista av todo saker
-  List ToDoList = [
-    ["Pussas", false],
-    ["Kramas", false],
-    ["Sprida kärlek", false],
-  ];
+  List<ToDoItem> toDoList = [];
+
+  //navigera till AddTask och lägga till tasks
+  void _navigateToNextScreen(BuildContext context) {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => AddTask()))
+        .then((value) {
+      if (value != null && value.isNotEmpty) {
+        //kan inte lägga till en tom uppgift
+        toDoList.add((ToDoItem(taskName: value, taskCompleted: false)));
+        setState(() {}); // Uppdatera homepage
+      }
+    });
+  }
+
+//funktion som filtrerar tasks enligt alternativen i filtret
+List<ToDoItem> filterTasks() {
+  switch (currentFilter) {
+    case TaskFilter.All:
+      return toDoList;
+    case TaskFilter.Done:
+      return toDoList.where((task) => task.taskCompleted).toList();
+    case TaskFilter.Undone:
+      return toDoList.where((task) => !task.taskCompleted).toList();
+    default:
+      return toDoList;
+  }
+}
+
 
 //checkbox ikryssad
   void checkBoxChanged(bool? value, int index) {
     setState(() {
-      ToDoList[index][1] = !ToDoList[index][1];
+      toDoList[index].taskCompleted = value ?? false;
     });
   }
 
@@ -33,59 +60,53 @@ class _HomePageState extends State<HomePage> {
           title: Text("TO DO", style: TextStyle(fontSize: 25)),
           backgroundColor: const Color.fromARGB(255, 222, 107, 145),
           actions: [
+            //filterikonen
             IconButton(
                 onPressed: () {
                   showDialog(
-                    context: context,
-                    builder: (BuildContext context) =>
-                        _buildPopupDialog(context),
-                  );
+                      context: context,
+                      builder: (context) {
+                        return MyFilter(onFilterSelected: (filter) {
+                          setState(() {
+                            currentFilter = filter;
+                          });
+                          Navigator.of(context).pop();
+                        });
+                      });
                 },
                 icon: Icon(
-                  Icons.more_vert,
+                  Icons.more_vert, 
                 ))
           ]),
 
-      floatingActionButton: FloatingActionButton(
+//knapp för add task
+     floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => AddTask()));
-        }, //pop up ^
+          _navigateToNextScreen(context);
+        }, 
         backgroundColor: Color.fromARGB(255, 222, 107, 145),
         child: Icon(Icons.add),
       ),
 
+//för att visa filterTasks (listan där tasks blir uppdelade enligt filtret)
       body: ListView.builder(
-        itemCount: ToDoList.length,
+        itemCount: filterTasks().length,
         itemBuilder: (context, index) {
+          final filteredTasks = filterTasks();
           return ToDoTile(
-            taskName: ToDoList[index][0],
-            taskCompleted: ToDoList[index][1],
-            onChanged: (value) => checkBoxChanged(value, index),
-          );
+              toDoItem: filteredTasks[index],
+              onChanged: (bool? newValue) {
+                checkBoxChanged(newValue, toDoList.indexOf(filteredTasks[index]));
+              },
+              onDelete: () {
+                if (index >= 0 && index < filteredTasks.length) {
+                  setState(() {
+                    toDoList.removeAt(toDoList.indexOf(filteredTasks[index]));
+                  });
+                }
+              });
         },
       ),
     );
   }
-}
-
-//Pop up-fönster:
-Widget _buildPopupDialog(BuildContext context) {
-  return AlertDialog(
-    title: const Text('Filter'),
-    content: Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[Text("All"), Text("Done"), Text("Not Done")],
-    ),
-    actions: <Widget>[
-      ElevatedButton(
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-        child: const Text('Close'),
-        style: ElevatedButton.styleFrom(primary: Color.fromARGB(255, 222, 107, 145),),
-      ),
-    ],
-  );
 }

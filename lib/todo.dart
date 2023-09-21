@@ -1,15 +1,27 @@
 import 'package:flutter/material.dart';
 
-class ToDoTile extends StatelessWidget {
-  final String taskName;
-  final bool taskCompleted;
-  Function(bool?)? onChanged;
+//nanm på uppgift och om boxen är ikryssad eller ej
+class ToDoItem {
+  String taskName;
+  bool taskCompleted;
 
-  ToDoTile({
-    super.key,
+  ToDoItem({
     required this.taskName,
     required this.taskCompleted,
+  });
+}
+
+// ignore: must_be_immutable
+class ToDoTile extends StatelessWidget {
+  final ToDoItem toDoItem;
+  Function(bool?)? onChanged;
+  Function() onDelete;
+
+  ToDoTile({
+     super.key,
+    required this.toDoItem,
     required this.onChanged,
+    required this.onDelete,
   });
 
   @override
@@ -26,20 +38,20 @@ class ToDoTile extends StatelessWidget {
         child: Row(
           children: [
             Checkbox(
-              value: taskCompleted, onChanged: onChanged,
+              value: toDoItem.taskCompleted, onChanged: onChanged,
               checkColor: Color.fromARGB(255, 222, 107, 145), //färg på V
               activeColor: Colors.white, //färg på innehållet i box
               side: BorderSide(color: Colors.white),
             ), //checkbox
-            //value = true/false om man utfört eller ej, onChanged = tillåter att det ändras
+            //value = true/false om man utfört uppgiften eller ej, onChanged = tillåter att det ändras
 
             Expanded(
                 child: Text(
               //namn på uppgiften
-              taskName,
+              toDoItem.taskName,
               style: TextStyle(
                   fontSize: 18,
-                  decoration: taskCompleted
+                  decoration: toDoItem.taskCompleted
                       ? TextDecoration.lineThrough
                       : TextDecoration.none,
                   decorationColor: Colors.white,
@@ -47,7 +59,7 @@ class ToDoTile extends StatelessWidget {
             )),
 
             IconButton(
-              onPressed: () {},
+              onPressed: () {onDelete();}, //för att kunna ta bort tasks
               icon: Icon(Icons.close),
               color: Colors.white,
             ),
