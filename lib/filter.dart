@@ -1,19 +1,11 @@
 import 'package:flutter/material.dart';
-import 'my_button.dart';
-
-//filter
-enum TaskFilter {
-All,
-Done,
-Undone,
-}
+import 'package:provider/provider.dart';
+import 'package:template/my_button.dart';
+import 'package:template/todo_mystate.dart';
 
 class MyFilter extends StatelessWidget {
-  final Function(TaskFilter) onFilterSelected;
-  
-  MyFilter({
-    super.key,
-    required this.onFilterSelected
+  const MyFilter({
+    super.key
   });
 
   @override
@@ -28,22 +20,27 @@ class MyFilter extends StatelessWidget {
         children: [
           //filter all
           MyButton(text: "ALL", onPressed: () {
-            onFilterSelected(TaskFilter.All);
+            context.read<MyState>().setFilter('all');
+            Navigator.of(context).pop();
           }),
 
           const SizedBox(height: 4),
 
           //filter done
           MyButton(text: "DONE", onPressed: () {
-            onFilterSelected(TaskFilter.Done);
+            context.read<MyState>().setFilter('done');
+            Navigator.of(context).pop();
           }),
 
           const SizedBox(height: 4),
 
           //filter undone
           MyButton(text: "UNDONE", onPressed: () {
-            onFilterSelected(TaskFilter.Undone);
+            context.read<MyState>().setFilter('undone');
+            Navigator.of(context).pop();
           }),
+
+          const SizedBox(height: 4),
         ],
       ),
       actions: <Widget>[
