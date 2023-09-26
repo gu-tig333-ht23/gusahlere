@@ -1,27 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:template/todo_mystate.dart';
 
 //nanm på uppgift och om boxen är ikryssad eller ej
-class ToDoItem {
-  String taskName;
-  bool taskCompleted;
-
-  ToDoItem({
-    required this.taskName,
-    required this.taskCompleted,
-  });
-}
-
-// ignore: must_be_immutable
 class ToDoTile extends StatelessWidget {
   final ToDoItem toDoItem;
-  Function(bool?)? onChanged;
-  Function() onDelete;
 
-  ToDoTile({
-     super.key,
+  const ToDoTile({
+    super.key,
     required this.toDoItem,
-    required this.onChanged,
-    required this.onDelete,
   });
 
   @override
@@ -37,14 +24,23 @@ class ToDoTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Checkbox(
-              value: toDoItem.taskCompleted, onChanged: onChanged,
-              checkColor: Color.fromARGB(255, 222, 107, 145), //färg på V
-              activeColor: Colors.white, //färg på innehållet i box
-              side: BorderSide(color: Colors.white),
-            ), //checkbox
-            //value = true/false om man utfört uppgiften eller ej, onChanged = tillåter att det ändras
-
+            GestureDetector(
+              onTap: () {
+                context.read<MyState>().checkBoxChanged(toDoItem);
+              },
+              child: !toDoItem.taskCompleted
+                  ? const Icon(
+                      Icons.check_box_outline_blank,
+                      color: Colors.white,
+                    )
+                  : const Icon(
+                      Icons.check_box,
+                      color: Colors.white,
+                    ),
+            ),
+            const SizedBox(
+              width: 15,
+            ),
             Expanded(
                 child: Text(
               //namn på uppgiften
@@ -57,9 +53,10 @@ class ToDoTile extends StatelessWidget {
                   decorationColor: Colors.white,
                   color: Colors.white),
             )),
-
             IconButton(
-              onPressed: () {onDelete();}, //för att kunna ta bort tasks
+              onPressed: () {
+                context.read<MyState>().deleteTask(toDoItem);
+              }, //för att kunna ta bort tasks
               icon: Icon(Icons.close),
               color: Colors.white,
             ),

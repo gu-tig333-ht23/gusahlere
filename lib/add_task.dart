@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'my_button.dart';
+import 'package:provider/provider.dart';
+import 'package:template/my_button.dart';
+import 'package:template/todo_mystate.dart';
+
 
 class AddTask extends StatelessWidget {
+  final _controller = TextEditingController();
+  
 //bakgrunden
   @override
   Widget build(BuildContext context) {
@@ -10,34 +15,7 @@ class AddTask extends StatelessWidget {
       appBar: AppBar(
           title: const Text("ADD TASK", style: TextStyle(fontSize: 25)),
           backgroundColor: const Color.fromARGB(255, 222, 107, 145)),
-      body: const AddTaskForm(),
-    );
-  }
-}
-
-//där man kan skriva in ny uppgift
-class AddTaskForm extends StatefulWidget {
-  const AddTaskForm({super.key});
-
-  @override
-  State<AddTaskForm> createState() => _AddTaskState();
-}
-
-//för att kunna spara ny uppgift
-class _AddTaskState extends State<AddTaskForm> {
-  final _controller = TextEditingController();
-
-  void saveNewTask(val) {
-    setState(() {
-      Navigator.of(context)
-          .pop(_controller.text); //spara det som skrivs in och ta med tillbaka
-    });
-  }
-
-//format och dekoration för textfältet
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
+      body: Padding(
         padding: const EdgeInsets.only(
             left: 25, right: 25, top: 25, bottom: 450), //mellanrum runt
 
@@ -75,13 +53,19 @@ class _AddTaskState extends State<AddTaskForm> {
                 child: MyButton(
                   text: "+ADD",
                   onPressed: () {
+                    
                     String enteredText = _controller.text;
-                    saveNewTask(enteredText); //spara det som skrivs in
+                    Provider.of<MyState>(context, listen: false).saveNewTask(enteredText);
+                    _controller.clear();
+                    Navigator.of(context).pop(); //spara det som skrivs in
                   },
                 ),
               ),
             ],
           ),
-        ));
+      )
+    )
+    );
+    
   }
 }
